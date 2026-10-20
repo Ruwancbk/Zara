@@ -18,10 +18,23 @@ jobs:
       - name: Arrange files
         run: |
           mkdir -p www
-          cp zara-app2.html www/index.html
+          cp zara-app3.html www/index.html
           cp logo.png www/
       - run: npm install
+      - name: Add backup plugins
+        run: npm install @capacitor/filesystem@^6 @capacitor/share@^6
       - run: npx cap add android
+      - name: Use permanent signing key
+        env:
+          KS: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KS" ]; then
+            echo "::error::KEYSTORE_B64 secret එක නැහැ."
+            exit 1
+          fi
+          mkdir -p ~/.android
+          echo "$KS" | base64 -d > ~/.android/debug.keystore
+          keytool -list -keystore ~/.android/debug.keystore -storepass android | grep -i androiddebugkey
       - name: Put logo as app icon
         run: |
           pip install pillow
@@ -55,6 +68,10 @@ jobs:
           open(os.path.join(vals, 'ic_launcher_background.xml'), 'w').write('<?xml version="1.0" encoding="utf-8"?>\n<resources>\n    <color name="ic_launcher_background">#FFFFFF</color>\n</resources>\n')
           print('icons done')
           PY
+      - name: Raise version number
+        run: |
+          sed -i "s/versionCode [0-9]*/versionCode $((${{ github.run_number }} + 10))/" android/app/build.gradle
+          grep -n "versionCode" android/app/build.gradle
       - run: npx cap sync android
       - name: Build debug APK
         working-directory: android
