@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="si">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#7a1f4b">
+<title>Zara Looms</title>
+<style>
+:root{--p:#7a1f4b;--p2:#a8326a;--bg:#f6f1f4;--card:#fff;--tx:#241a20;--mut:#7b6a73;--ok:#1b8a4b;--bad:#c62828;--warn:#d98200;--line:#eadfe5}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,"Noto Sans Sinhala","Iskoola Pota",sans-serif;background:var(--bg);color:var(--tx);padding-bottom:78px}
+header{background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;padding:12px 16px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:19px}
+header small{opacity:.85}
+main{padding:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--card);border-radius:14px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.07);margin-bottom:10px}
+.stat .l{font-size:12px;color:var(--mut)}
+.stat .v{font-size:20px;font-weight:700;margin-top:2px}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+h2{font-size:15px;margin:14px 2px 8px;color:var(--p)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.item{padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border:0}
+.item .n{font-weight:600}
+.item .s,.s{font-size:12px;color:var(--mut)}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;background:#eee;white-space:nowrap;display:inline-block}
+.b-ok{background:#dff3e6;color:var(--ok)}.b-bad{background:#fde3e3;color:var(--bad)}.b-warn{background:#fff0d6;color:var(--warn)}.b-p{background:#f3e1ec;color:var(--p)}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;display:flex;border-top:1px solid var(--line);z-index:6}
+nav button{flex:1;border:0;background:none;padding:8px 0 10px;font-size:10.5px;color:var(--mut)}
+nav button b{display:block;font-size:19px;font-weight:400}
+nav button.on{color:var(--p);font-weight:700}
+.fab{position:fixed;right:16px;bottom:84px;background:var(--p);color:#fff;border:0;border-radius:28px;padding:14px 20px;font-size:15px;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:7}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:none;align-items:flex-end}
+.modal.show{display:flex}
+.sheet{background:#fff;width:100%;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
+.sheet h3{margin:0 0 10px;color:var(--p)}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 3px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d9cbd3;border-radius:10px;font-size:15px;background:#fff;font-family:inherit}
+.btn{border:0;border-radius:10px;padding:12px;font-size:15px;background:var(--p);color:#fff;width:100%;margin-top:14px}
+.btn.sec{background:#efe4ea;color:var(--p)}
+.btn.del{background:#fde3e3;color:var(--bad)}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;padding:10px;border:1px solid #d9cbd3;background:#fff;border-radius:10px;font-size:14px}
+.seg button.on{background:var(--p);color:#fff;border-color:var(--p)}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px;padding-bottom:2px}
+.chips button{flex:0 0 auto;border:1px solid #d9cbd3;background:#fff;border-radius:20px;padding:7px 13px;font-size:13px}
+.chips button.on{background:var(--p);color:#fff;border-color:var(--p)}
+.total{background:#f6edf2;border-radius:10px;padding:10px;margin-top:10px;text-align:center}
+.empty{text-align:center;color:var(--mut);padding:24px 0;font-size:14px}
+.bar{height:8px;background:#eee;border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.search{margin-bottom:10px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--tx);margin:12px 0 4px}
+.chk input{width:auto}
+.rolebox{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.inst-h{background:linear-gradient(135deg,#f6e9f0,#fff);border-radius:12px;padding:10px 12px;margin:14px 0 6px}
+.inst-h .t{font-weight:700;color:var(--p);font-size:16px}
+.irow{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:3px 0}
+</style>
+</head>
+<body>
+<header style="display:flex;align-items:center;gap:12px"><img src="logo.png" alt="Zara Looms" style="width:44px;height:44px;border-radius:50%;background:#fff;padding:2px"><div><h1>Zara Looms</h1><small id="sub"></small></div></header>
+<main id="main"></main>
+<button class="fab" id="fab" onclick="openForm()">＋ අලුත්</button>
+<nav>
+  <button data-t="home"><b>🏠</b>මුල් පිටුව</button>
+  <button data-t="buy"><b>📥</b>ගැනීම්</button>
+  <button data-t="sell"><b>📤</b>විකුණුම්</button>
+  <button data-t="people"><b>👥</b>පුද්ගලයෝ</button>
+  <button data-t="inst"><b>🏢</b>ආයතන</button>
+  <button data-t="more"><b>⚙️</b>තවත්</button>
+</nav>
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+
+<script>
+const KEY='sari_manager_v1';
+let S={purchases:[],sales:[],contacts:[]};
+let tab='home', q='', pf='all';
+const RL={supplier:'සැපයුම්කරු',customer:'ගැනුම්කරු',agent:'Agent'};
+try{const d=localStorage.getItem(KEY);if(d)S=JSON.parse(d);}catch(e){}
+
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert('දත්ත සුරැකීමට නොහැකි විය')}};
+const $=id=>document.getElementById(id);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rs=n=>'රු. '+Math.round(n||0).toLocaleString('en-US');
+const paid=r=>(r.payments||[]).reduce((a,p)=>a+(+p.amount||0),0);
+const bal=r=>Math.max(0,r.total-paid(r));
+const isOver=r=>bal(r)>0&&r.due&&r.due<today();
+const fdate=d=>d||'-';
+const cname=r=>{const c=S.contacts.find(x=>x.id===r.cid);return c?c.name:r.party};
+const cget=id=>S.contacts.find(x=>x.id===id);
+
+/* වාරික දෙකක් ඇති නම්, ඊළඟට ගෙවිය යුතු වාරිකයේ දිනය r.due ලෙස තබයි */
+function syncDue(r){
+  if(!r.inst||!r.inst.length)return;
+  if(bal(r)<=0){return}
+  const p=paid(r);let cum=r.instBase||0;
+  for(const i of r.inst){cum+=i.amount;if(p<cum-0.5){r.due=i.due;return}}
+}
+/* වාරික වල තත්ත්වය */
+function instStatus(r){
+  if(!r.inst)return [];
+  const p=paid(r);let cum=r.instBase||0;
+  return r.inst.map((i,k)=>{
+    const before=cum;cum+=i.amount;
+    const got=Math.max(0,Math.min(i.amount,p-before));
+    const done=got>=i.amount-0.5;
+    return {no:k+1,amount:i.amount,due:i.due,got,done,over:!done&&i.due&&i.due<today()};
+  });
+}
+
+function norm(){
+  S.purchases=S.purchases||[];S.sales=S.sales||[];S.contacts=S.contacts||[];
+  const recs=[...S.purchases.map(r=>({r,role:'supplier'})),...S.sales.map(r=>({r,role:null}))];
+  recs.forEach(({r,role})=>{
+    const rr=role||(r.kind==='agent'?'agent':'customer');
+    if(!r.cid){
+      let c=S.contacts.find(x=>x.name.trim().toLowerCase()===String(r.party).trim().toLowerCase());
+      if(!c){c={id:uid(),name:String(r.party).trim(),phone:'',address:'',roles:[]};S.contacts.push(c)}
+      r.cid=c.id;
+    }
+    const c=cget(r.cid);
+    if(c){c.roles=c.roles||[];if(!c.roles.includes(rr))c.roles.push(rr)}
+    syncDue(r);
+  });
+  S.contacts.forEach(c=>{if(!c.roles||!c.roles.length)c.roles=['customer']});
+}
+
+function calc(){
+  const bq=S.purchases.reduce((a,r)=>a+r.qty,0), sq=S.sales.reduce((a,r)=>a+r.qty,0);
+  const bt=S.purchases.reduce((a,r)=>a+r.total,0), bp=S.purchases.reduce((a,r)=>a+paid(r),0);
+  const st=S.sales.reduce((a,r)=>a+r.total,0), sp=S.sales.reduce((a,r)=>a+paid(r),0);
+  const avg=bq?bt/bq:0, cogs=avg*sq;
+  return {stock:bq-sq,bq,sq,bt,bp,owe:bt-bp,st,sp,recv:st-sp,avg,cogs,profit:st-cogs,cash:sp-bp};
+}
+
+function render(){
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+  $('fab').style.display=(tab==='more'||tab==='inst')?'none':'block';
+  $('fab').textContent=tab==='buy'?'＋ සාරි ගැනීමක්':tab==='sell'?'＋ විකුණුමක්':tab==='people'?'＋ පුද්ගලයෙක්':'＋ අලුත්';
+  const c=calc();
+  $('sub').textContent='තොගය: '+c.stock+' සාරි';
+  $('main').innerHTML=tab==='home'?home(c):tab==='buy'?list('buy'):tab==='sell'?list('sell'):tab==='people'?people():tab==='inst'?institutions():more();
+}
+
+function phoneOf(r){const c=cget(r.cid);return c&&c.phone?'📞 '+esc(c.phone)+' • ':''}
+function home(c){
+  const owe=S.purchases.filter(r=>bal(r)>0).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+  const rec=S.sales.filter(r=>bal(r)>0).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+  const line=(r,t)=>`<div class="item" onclick="openDetail('${t}','${r.id}')"><div class="row"><div><div class="n">${esc(cname(r))}</div><div class="s">${phoneOf(r)}${r.qty} සාරි • ගෙවිය යුතු දිනය: ${fdate(r.due)}${r.inst&&r.instName?'<br>🏢 '+esc(r.instName):''}</div></div><div style="text-align:right"><div class="${t==='buy'?'bad':'ok'}"><b>${rs(bal(r))}</b></div>${isOver(r)?'<span class="badge b-bad">කල් ඉකුත්</span>':''}</div></div></div>`;
+  return `
+  <div class="card stat" style="background:linear-gradient(135deg,#fff,#f6e9f0)"><div class="l">දැන් ගාව තියෙන සාරි ගණන</div><div class="v" style="font-size:34px;color:var(--p)">${c.stock}</div>
+  <div class="s">මුළු ගත්ත ${c.bq} • විකුණපු ${c.sq}</div></div>
+  <div class="grid">
+    <div class="card stat"><div class="l">මුළු විකුණුම්</div><div class="v">${rs(c.st)}</div></div>
+    <div class="card stat"><div class="l">ලාභය (ඇස්තමේන්තු)</div><div class="v ${c.profit>=0?'ok':'bad'}">${rs(c.profit)}</div></div>
+    <div class="card stat"><div class="l">ලැබිලා තියෙන මුදල</div><div class="v ok">${rs(c.sp)}</div></div>
+    <div class="card stat"><div class="l">මට ලැබිය යුතු</div><div class="v warn">${rs(c.recv)}</div></div>
+    <div class="card stat"><div class="l">සාරි ගත්ත වටිනාකම</div><div class="v">${rs(c.bt)}</div></div>
+    <div class="card stat"><div class="l">මම ගෙවිය යුතු</div><div class="v bad">${rs(c.owe)}</div></div>
+  </div>
+  <div class="card stat"><div class="l">අතේ ඉතුරු මුදල (ලැබුණු − ගෙවූ)</div><div class="v ${c.cash>=0?'ok':'bad'}">${rs(c.cash)}</div></div>
+  <h2>📅 මම ගෙවන්න තියෙන ඒවා</h2><div class="card">${owe.length?owe.map(r=>line(r,'buy')).join(''):'<div class="empty">ගෙවන්න කිසිවක් නැත 🎉</div>'}</div>
+  <h2>💰 මට ලැබෙන්න තියෙන ඒවා</h2><div class="card">${rec.length?rec.map(r=>line(r,'sell')).join(''):'<div class="empty">ලැබිය යුතු කිසිවක් නැත</div>'}</div>`;
+}
+
+function list(t){
+  const arr=(t==='buy'?S.purchases:S.sales).slice().sort((a,b)=>a.date<b.date?1:-1)
+    .filter(r=>{const c=cget(r.cid)||{};const k=q.toLowerCase();return !q||cname(r).toLowerCase().includes(k)||String(c.phone||'').includes(q)});
+  const tot=arr.reduce((a,r)=>a+r.total,0);
+  return `<input class="search" placeholder="🔍 නමින් හෝ අංකයෙන් සොයන්න" value="${esc(q)}" oninput="q=this.value;render();this.focus()">
+  <div class="card row"><span>${arr.length} ඇතුළත් කිරීම්</span><b>${rs(tot)}</b></div>
+  <div class="card">${arr.length?arr.map(r=>{
+    const b=bal(r);
+    const st=b<=0?'<span class="badge b-ok">සම්පූර්ණයි</span>':isOver(r)?'<span class="badge b-bad">කල් ඉකුත්</span>':'<span class="badge b-warn">ඉතිරියක් ඇත</span>';
+    const pct=r.total?Math.min(100,paid(r)/r.total*100):100;
+    return `<div class="item" onclick="openDetail('${t}','${r.id}')"><div class="row"><div><div class="n">${esc(cname(r))}${r.kind==='agent'?' <span class="badge">Agent</span>':''}</div><div class="s">${phoneOf(r)}${fdate(r.date)} • ${r.qty} සාරි × ${rs(r.unit)} • ${r.type==='cash'?'අත්පිට':'නයට'}${r.instName?'<br>🏢 '+esc(r.instName)+(r.given?' • දුන් දිනය '+r.given:''):''}</div></div><div style="text-align:right"><b>${rs(r.total)}</b><br>${st}</div></div>
+    ${b>0?`<div class="bar"><i style="width:${pct}%"></i></div><div class="s">ගෙවූ ${rs(paid(r))} • ඉතිරි <b>${rs(b)}</b> • ඊළඟ දිනය ${fdate(r.due)}</div>`:''}</div>`}).join(''):'<div class="empty">තවම ඇතුළත් කර නැත.<br>පහළ බොත්තමෙන් එකතු කරන්න.</div>'}</div>`;
+}
+
+/* ---------- ආයතන (ගෙවීමට දුන් ආයතන) ---------- */
+function institutions(){
+  const rows=S.sales.filter(r=>r.instName);
+  if(!rows.length)return `<div class="card"><div class="empty">ආයතනයකට ගෙවීමට දුන් විකුණුම් නැත.<br><br>විකුණුමක් <b>නයට</b> ඇතුළත් කරද්දි "ආයතනය" සහ "දුන් දිනය" දාන්න.<br>එවිට මෙතන පේනවා.</div></div>`;
+  const g={};rows.forEach(r=>{(g[r.instName]=g[r.instName]||[]).push(r)});
+  const names=Object.keys(g).sort((a,b)=>a.localeCompare(b));
+  return names.map(n=>{
+    const a=g[n].sort((x,y)=>(x.given||x.date)<(y.given||y.date)?1:-1);
+    const tot=a.reduce((s,r)=>s+r.total,0),pd=a.reduce((s,r)=>s+paid(r),0);
+    return `<div class="inst-h"><div class="t">🏢 ${esc(n)}</div><div class="s">විකුණුම් ${a.length} • මුළු ${rs(tot)} • ලැබුණු ${rs(pd)} • <b class="${tot-pd>0?'warn':'ok'}">ඉතිරි ${rs(tot-pd)}</b></div></div>
+    <div class="card">${a.map(r=>{
+      const ist=instStatus(r);
+      return `<div class="item" onclick="openDetail('sell','${r.id}')"><div class="row"><div><div class="n">${esc(cname(r))}</div><div class="s">${phoneOf(r)}${r.qty} සාරි • ${rs(r.total)}</div></div><div style="text-align:right"><span class="badge b-p">දුන් දිනය</span><br><b>${fdate(r.given||r.date)}</b></div></div>
+      ${ist.length?ist.map(i=>`<div class="irow"><span>${i.no===1?'පළමු':'දෙවන'} වාරිකය • ${rs(i.amount)}</span><span>${i.due} ${i.done?'<span class="badge b-ok">ගෙවා ඇත</span>':i.over?'<span class="badge b-bad">කල් ඉකුත්</span>':i.got>0?'<span class="badge b-warn">කොටසක් ගෙවා ඇත</span>':'<span class="badge b-warn">ගෙවීමට ඇත</span>'}</span></div>`).join(''):`<div class="irow"><span>ඉතිරි ${rs(bal(r))}${r.due?' • '+r.due:''}</span><span>${bal(r)<=0?'<span class="badge b-ok">ගෙවා ඇත</span>':isOver(r)?'<span class="badge b-bad">කල් ඉකුත්</span>':'<span class="badge b-warn">ගෙවීමට ඇත</span>'}</span></div>`}</div>`}).join('')}</div>`;
+  }).join('');
+}
+
+/* ---------- පුද්ගලයෝ (Contacts) ---------- */
+function cstats(id){
+  const p=S.purchases.filter(r=>r.cid===id), s=S.sales.filter(r=>r.cid===id);
+  return {pq:p.reduce((a,r)=>a+r.qty,0),pt:p.reduce((a,r)=>a+r.total,0),owe:p.reduce((a,r)=>a+bal(r),0),
+          sq:s.reduce((a,r)=>a+r.qty,0),st:s.reduce((a,r)=>a+r.total,0),recv:s.reduce((a,r)=>a+bal(r),0),n:p.length+s.length};
+}
+function roleBadges(c){return (c.roles||[]).map(x=>`<span class="badge b-p">${RL[x]}</span>`).join(' ')}
+function people(){
+  const arr=S.contacts.slice().sort((a,b)=>a.name.localeCompare(b.name))
+    .filter(c=>pf==='all'||(c.roles||[]).includes(pf))
+    .filter(c=>!q||c.name.toLowerCase().includes(q.toLowerCase())||String(c.phone||'').includes(q));
+  const chip=(k,l)=>`<button class="${pf===k?'on':''}" onclick="pf='${k}';render()">${l}</button>`;
+  return `<div class="chips">${chip('all','සියල්ල')}${chip('supplier','📥 සැපයුම්කරුවෝ (සාරි ගන්න අය)')}${chip('customer','📤 ගැනුම්කරුවෝ')}${chip('agent','🤝 Agents')}</div>
+  <input class="search" placeholder="🔍 නමින් හෝ අංකයෙන් සොයන්න" value="${esc(q)}" oninput="q=this.value;render();this.focus()">
+  <div class="card row"><span>${pf==='all'?'මුළු පුද්ගලයන්':RL[pf]+'වරු'}</span><b>${arr.length}</b></div>
+  <div class="card">${arr.length?arr.map(c=>{const t=cstats(c.id);return `<div class="item" onclick="openContact('${c.id}')"><div class="row"><div><div class="n">${esc(c.name)}</div><div class="s">${c.phone?'📞 '+esc(c.phone):'📞 අංකයක් නැත'}<br>${c.address?'📍 '+esc(c.address):'📍 ලිපිනයක් නැත'}</div><div style="margin-top:3px">${roleBadges(c)}</div></div><div style="text-align:right">${t.owe>0?`<div class="bad" style="font-size:12px">මම ගෙවිය යුතු<br><b>${rs(t.owe)}</b></div>`:''}${t.recv>0?`<div class="ok" style="font-size:12px">මට ලැබිය යුතු<br><b>${rs(t.recv)}</b></div>`:''}</div></div></div>`}).join(''):'<div class="empty">මෙම කොටසේ කිසිවෙක් නැත.<br>පහළ බොත්තමෙන් එකතු කරන්න.</div>'}</div>`;
+}
+function contactFields(c,withRoles,defRoles){
+  c=c||{};const rl=c.roles||defRoles||[];
+  return `<label>නම</label><input id="c_name" value="${esc(c.name||'')}" placeholder="සම්පූර්ණ නම">
+  <label>දුරකථන අංකය (අවශ්‍ය නම් පමණක්)</label><input id="c_phone" type="tel" inputmode="tel" value="${esc(c.phone||'')}" placeholder="07X XXX XXXX">
+  <label>ලිපිනය (අවශ්‍ය නම් පමණක්)</label><textarea id="c_addr" rows="2" placeholder="ලිපිනය">${esc(c.address||'')}</textarea>
+  ${withRoles?`<label>මොහු කවුද? (එකකට වඩා තෝරන්න පුළුවන්)</label><div class="rolebox">${Object.keys(RL).map(k=>`<label class="chk"><input type="checkbox" id="c_r_${k}" ${rl.includes(k)?'checked':''}> ${k==='supplier'?'සැපයුම්කරු (මම සාරි ගන්නේ මෙයාගෙන්)':k==='customer'?'ගැනුම්කරු (මම සාරි විකුණන්නේ මෙයාට)':'Agent (මා වෙනුවෙන් විකුණන කෙනා)'}</label>`).join('')}</div>`:''}`;
+}
+function openContactForm(id){
+  const c=id?cget(id):null;
+  $('sheet').innerHTML=`<h3>${c?'✏️ විස්තර වෙනස් කරන්න':'👤 අලුත් පුද්ගලයෙක්'}</h3>${contactFields(c,true,pf!=='all'?[pf]:[])}
+  <button class="btn" onclick="saveContact('${id||''}')">සුරකින්න</button><button class="btn sec" onclick="closeM()">අවලංගු</button>`;
+  $('modal').classList.add('show');
+}
+function saveContact(id){
+  const name=$('c_name').value.trim(),phone=$('c_phone').value.trim(),address=$('c_addr').value.trim();
+  const roles=Object.keys(RL).filter(k=>$('c_r_'+k).checked);
+  if(!name)return alert('නම ඇතුළත් කරන්න');
+  if(!roles.length)return alert('මොහු කවුද කියලා (සැපයුම්කරු / ගැනුම්කරු / Agent) තෝරන්න');
+  if(id){const c=cget(id);c.name=name;c.phone=phone;c.address=address;c.roles=roles;[...S.purchases,...S.sales].forEach(r=>{if(r.cid===id)r.party=name})}
+  else S.contacts.push({id:uid(),name,phone,address,roles});
+  save();closeM();render();
+}
+function openContact(id){
+  const c=cget(id);if(!c)return;const t=cstats(id);
+  const recs=[...S.purchases.filter(r=>r.cid===id).map(r=>({r,t:'buy'})),...S.sales.filter(r=>r.cid===id).map(r=>({r,t:'sell'}))].sort((a,b)=>a.r.date<b.r.date?1:-1);
+  $('sheet').innerHTML=`<h3>${esc(c.name)}</h3>
+  <div class="card" style="box-shadow:none;background:#faf5f8"><div class="s" style="line-height:1.9;font-size:14px;color:var(--tx)">📞 ${c.phone?`<a href="tel:${esc(c.phone)}">${esc(c.phone)}</a>`:'-'}<br>📍 ${esc(c.address||'-')}<br>${roleBadges(c)}</div></div>
+  <div class="grid"><div class="card stat" style="box-shadow:none;background:#faf5f8"><div class="l">මා විසින් විකුණපු සාරි</div><div class="v" style="font-size:16px">${t.sq} • ${rs(t.st)}</div><div class="l">මට ලැබිය යුතු: <b class="warn">${rs(t.recv)}</b></div></div>
+  <div class="card stat" style="box-shadow:none;background:#faf5f8"><div class="l">මා ගත්ත සාරි</div><div class="v" style="font-size:16px">${t.pq} • ${rs(t.pt)}</div><div class="l">මම ගෙවිය යුතු: <b class="bad">${rs(t.owe)}</b></div></div></div>
+  <h2>ගනුදෙනු</h2><div class="card" style="box-shadow:none">${recs.length?recs.map(({r,t})=>`<div class="item" onclick="openDetail('${t}','${r.id}')"><div class="row"><div><div class="n">${t==='buy'?'📥 ගැනීම':'📤 විකුණුම'}</div><div class="s">${fdate(r.date)} • ${r.qty} සාරි</div></div><div style="text-align:right"><b>${rs(r.total)}</b><br><span class="s">ඉතිරි ${rs(bal(r))}</span></div></div></div>`).join(''):'<div class="empty">ගනුදෙනු නැත</div>'}</div>
+  <button class="btn" onclick="openContactForm('${id}')">✏️ විස්තර වෙනස් කරන්න</button>
+  <button class="btn del" onclick="delContact('${id}')">මකන්න</button>
+  <button class="btn sec" onclick="closeM()">වසන්න</button>`;
+  $('modal').classList.add('show');
+}
+function delContact(id){
+  if(S.purchases.some(r=>r.cid===id)||S.sales.some(r=>r.cid===id))return alert('මොහුට ගනුදෙනු ඇති නිසා මැකිය නොහැක');
+  if(!confirm('මෙම පුද්ගලයා මකන්නද?'))return;
+  S.contacts=S.contacts.filter(c=>c.id!==id);save();closeM();render();
+}
+
+function more(){
+  return `<div class="card"><h3 style="margin:0 0 6px">💾 දත්ත Backup</h3><div class="s" style="font-size:13px">දත්ත ඔබේ phone එකේම සුරැකෙනවා. Phone එක මාරු කරන්න කලින් හෝ app එක අස්ථාපනය කරන්න කලින් backup එකක් ගන්න.</div>
+  <button class="btn" onclick="exportData()">Backup ගන්න (ගොනුවක් විදිහට)</button>
+  <button class="btn sec" onclick="copyBackup()">Backup එක text එකක් විදිහට copy කරන්න</button>
+  <button class="btn sec" onclick="$('imp').click()">ගොනුවකින් ආපසු දාන්න</button>
+  <button class="btn sec" onclick="pasteRestore()">Text එකකින් ආපසු දාන්න (paste)</button>
+  <input type="file" id="imp" style="display:none" onchange="importData(this)"></div>
+  <div class="card"><h3 style="margin:0 0 6px">📊 සාරාංශය</h3>${(()=>{const c=calc();return `<div class="s" style="line-height:1.9;font-size:14px">සාරියක සාමාන්‍ය ගත්ත මිල: <b>${rs(c.avg)}</b><br>විකුණපු සාරි වල ගත්ත වටිනාකම: <b>${rs(c.cogs)}</b><br>ලාභය = විකුණුම් − ගත්ත වටිනාකම (සාමාන්‍ය මිල අනුව)</div>`})()}</div>
+  <div class="card"><button class="btn del" style="margin:0" onclick="wipe()">සියලු දත්ත මකන්න</button></div>`;
+}
+
+/* ---------- Form ---------- */
+let F={};
+function roleFor(){return F.t==='buy'?'supplier':(F.kind==='agent'?'agent':'customer')}
+function fillSel(){
+  const role=roleFor();
+  const cs=S.contacts.filter(c=>(c.roles||[]).includes(role)).sort((a,b)=>a.name.localeCompare(b.name));
+  $('f_cid').innerHTML='<option value="">— තෝරන්න —</option>'+cs.map(c=>`<option value="${c.id}">${esc(c.name)}${c.phone?' • '+esc(c.phone):''}</option>`).join('')+'<option value="__new">＋ අලුත් '+RL[role]+' කෙනෙක් එකතු කරන්න</option>';
+  $('newC').style.display='none';
+}
+function pickC(){$('newC').style.display=$('f_cid').value==='__new'?'block':'none'}
+function toggleTwo(){const on=$('f_two').checked;$('oneBox').style.display=on?'none':'block';$('twoBox').style.display=on?'block':'none';calcI()}
+function calcI(){
+  const total=(+$('f_qty').value||0)*(+$('f_unit').value||0),adv=+$('f_adv').value||0,i1=+$('f_i1').value||0;
+  const rem=Math.max(0,total-adv);$('f_i2txt').innerHTML='ඉතිරි මුදල: <b>'+rs(rem)+'</b> • දෙවන වාරිකය: <b>'+rs(Math.max(0,rem-i1))+'</b>';
+}
+function openForm(){
+  if(tab==='people')return openContactForm();
+  const t=tab==='buy'?'buy':tab==='sell'?'sell':null;
+  if(!t){ $('sheet').innerHTML=`<h3>මොකක්ද එකතු කරන්නේ?</h3><button class="btn" onclick="tab='buy';render();openForm()">📥 සාරි ගැනීමක්</button><button class="btn" onclick="tab='sell';render();openForm()">📤 විකුණුමක්</button><button class="btn sec" onclick="closeM()">වසන්න</button>`; $('modal').classList.add('show'); return; }
+  F={t,type:'cash',kind:'direct'};
+  const insts=[...new Set(S.sales.map(r=>r.instName).filter(Boolean))];
+  $('sheet').innerHTML=`<h3>${t==='buy'?'📥 සාරි ගැනීමක්':'📤 විකුණුමක්'}</h3>
+  ${t==='sell'?`<label>විකුණන ආකාරය</label><div class="seg" id="kseg"><button class="on" data-k="direct">මම කෙලින්ම</button><button data-k="agent">Agent කෙනෙක් හරහා</button></div>`:''}
+  <label>${t==='buy'?'සාරි ගන්නේ කවුරුන්ගෙන්ද (සැපයුම්කරු)':'කාටද විකුණන්නේ'}</label>
+  <select id="f_cid" onchange="pickC()"></select>
+  <div id="newC" style="display:none;background:#faf5f8;border-radius:10px;padding:2px 10px 10px;margin-top:8px">${contactFields(null,false)}</div>
+  <label>දිනය</label><input type="date" id="f_date" value="${today()}">
+  <div class="grid"><div><label>සාරි ගණන</label><input type="number" inputmode="numeric" id="f_qty" oninput="calcT()"></div><div><label>සාරියක මිල (රු.)</label><input type="number" inputmode="decimal" id="f_unit" oninput="calcT()"></div></div>
+  <div class="total">මුළු මුදල: <b id="f_tot">රු. 0</b></div>
+  <label>ගෙවීමේ ක්‍රමය</label><div class="seg" id="tseg"><button class="on" data-k="cash">අත්පිට මුදලට</button><button data-k="credit">නයට</button></div>
+  <div id="creditBox" style="display:none">
+    <label>දැනටමත් ගෙවූ/ලැබූ මුදල (රු.)</label><input type="number" inputmode="decimal" id="f_adv" placeholder="0" oninput="calcI()">
+    ${t==='sell'?`<label>🏢 ආයතනය (ගෙවීමට දුන්න ආයතනය)</label><input id="f_inst" list="instlist" placeholder="ආයතනයේ නම (අවශ්‍ය නම්)"><datalist id="instlist">${insts.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+    <label>ආයතනයට දුන් දිනය</label><input type="date" id="f_given" value="${today()}">`:''}
+    <label class="chk"><input type="checkbox" id="f_two" onchange="toggleTwo()"> වාරික දෙකකට බෙදන්න</label>
+    <div id="oneBox"><label>ඉතිරි මුදල ගෙවිය යුතු දිනය</label><input type="date" id="f_due"></div>
+    <div id="twoBox" style="display:none">
+      <label>පළමු වාරිකය (රු.)</label><input type="number" inputmode="decimal" id="f_i1" oninput="calcI()">
+      <label>පළමු වාරිකයේ දිනය</label><input type="date" id="f_d1">
+      <div class="total" id="f_i2txt"></div>
+      <label>දෙවන වාරිකයේ දිනය</label><input type="date" id="f_d2">
+    </div>
+  </div>
+  <label>සටහනක් (අවශ්‍ය නම්)</label><input id="f_note">
+  <button class="btn" onclick="saveForm()">සුරකින්න</button><button class="btn sec" onclick="closeM()">අවලංගු</button>`;
+  fillSel();
+  document.querySelectorAll('#tseg button').forEach(b=>b.onclick=()=>{F.type=b.dataset.k;document.querySelectorAll('#tseg button').forEach(x=>x.classList.toggle('on',x===b));$('creditBox').style.display=F.type==='credit'?'block':'none'});
+  document.querySelectorAll('#kseg button').forEach(b=>b.onclick=()=>{F.kind=b.dataset.k;document.querySelectorAll('#kseg button').forEach(x=>x.classList.toggle('on',x===b));fillSel()});
+  $('modal').classList.add('show');
+}
+function calcT(){const t=(+$('f_qty').value||0)*(+$('f_unit').value||0);$('f_tot').textContent=rs(t);if($('f_i2txt'))calcI()}
+function saveForm(){
+  const qty=+$('f_qty').value, unit=+$('f_unit').value, date=$('f_date').value||today();
+  const sel=$('f_cid').value; let ct=null, newCt=null;
+  if(!sel)return alert('පුද්ගලයා තෝරන්න');
+  if(sel==='__new'){
+    const nm=$('c_name').value.trim();
+    if(!nm)return alert('නම ඇතුළත් කරන්න');
+    newCt={id:uid(),name:nm,phone:$('c_phone').value.trim(),address:$('c_addr').value.trim(),roles:[roleFor()]};ct=newCt;
+  } else ct=cget(sel);
+  const party=ct.name;
+  if(!(qty>0))return alert('සාරි ගණන ඇතුළත් කරන්න');
+  if(!(unit>=0)||$('f_unit').value==='')return alert('සාරියක මිල ඇතුළත් කරන්න');
+  const total=qty*unit;
+  const r={id:uid(),cid:ct.id,date,party,qty,unit,total,type:F.type,note:$('f_note').value.trim(),payments:[],due:''};
+  if(F.t==='sell')r.kind=F.kind;
+  if(F.type==='cash'){r.payments=[{date,amount:total}]}
+  else{
+    const adv=+$('f_adv').value||0;
+    if(adv>total)return alert('ගෙවූ මුදල මුළු මුදලට වඩා වැඩියි');
+    if(adv>0)r.payments.push({date,amount:adv});
+    const rem=total-adv;
+    if(F.t==='sell'){
+      const nm=$('f_inst').value.trim();
+      if(nm){r.instName=nm;r.given=$('f_given').value||today()}
+    }
+    if($('f_two').checked&&rem>0){
+      const i1=+$('f_i1').value,d1=$('f_d1').value,d2=$('f_d2').value;
+      if(!(i1>0)||i1>=rem)return alert('පළමු වාරිකය 0ට වඩා වැඩි සහ ඉතිරි මුදලට වඩා අඩු විය යුතුයි');
+      if(!d1||!d2)return alert('වාරික දෙකේම දිනයන් ඇතුළත් කරන්න');
+      r.instBase=adv;r.inst=[{amount:i1,due:d1},{amount:rem-i1,due:d2}];
+      r.due=d1;
+    } else {
+      r.due=$('f_due').value;
+      if(!r.due&&rem>0)return alert('ගෙවිය යුතු දිනය ඇතුළත් කරන්න');
+    }
+  }
+  if(F.t==='sell'){
+    const c=calc(); if(qty>c.stock && !confirm(`තොගයේ ඇත්තේ සාරි ${c.stock}ක් පමණයි. ඒත් සුරකින්නද?`))return;
+    S.sales.push(r);
+  } else S.purchases.push(r);
+  if(newCt)S.contacts.push(newCt);
+  syncDue(r);
+  save();closeM();render();
+}
+
+/* ---------- Detail ---------- */
+function openDetail(t,id){
+  const r=get(t,id); if(!r)return;
+  const b=bal(r);
+  const ct=cget(r.cid)||{};
+  const ist=instStatus(r);
+  $('sheet').innerHTML=`<h3>${esc(cname(r))}${r.kind==='agent'?' (Agent)':''}</h3>
+  <div class="card" style="box-shadow:none;background:#faf5f8"><div class="s" style="line-height:1.8;font-size:14px;color:var(--tx)">${ct.phone?`📞 <a href="tel:${esc(ct.phone)}">${esc(ct.phone)}</a><br>`:''}${ct.address?`📍 ${esc(ct.address)}<br>`:''}දිනය: ${fdate(r.date)}<br>සාරි: ${r.qty} × ${rs(r.unit)}<br>මුළු මුදල: <b>${rs(r.total)}</b><br>ක්‍රමය: ${r.type==='cash'?'අත්පිට':'නයට'}<br>${t==='buy'?'ගෙවූ':'ලැබූ'} මුදල: <b class="ok">${rs(paid(r))}</b><br>ඉතිරි: <b class="${b>0?'bad':'ok'}">${rs(b)}</b>${r.due&&b>0?`<br>ඊළඟ දිනය: <b>${r.due}</b>${isOver(r)?' ⚠️':''}`:''}${r.instName?`<br>🏢 ආයතනය: <b>${esc(r.instName)}</b> • දුන් දිනය: <b>${fdate(r.given)}</b>`:''}${r.note?`<br>සටහන: ${esc(r.note)}`:''}</div></div>
+  ${ist.length?`<h2>වාරික</h2><div class="card" style="box-shadow:none">${ist.map(i=>`<div class="irow"><span>${i.no===1?'පළමු':'දෙවන'} වාරිකය • ${rs(i.amount)}</span><span>${i.due} ${i.done?'<span class="badge b-ok">ගෙවා ඇත</span>':i.over?'<span class="badge b-bad">කල් ඉකුත්</span>':'<span class="badge b-warn">ගෙවීමට ඇත</span>'}</span></div>`).join('')}</div>`:''}
+  ${t==='sell'&&r.type==='credit'?`<label>🏢 ආයතනය (ගෙවීමට දුන්න)</label><input id="d_inst" value="${esc(r.instName||'')}" onchange="setInst('${id}')">
+  <label>ආයතනයට දුන් දිනය</label><input type="date" id="d_given" value="${r.given||''}" onchange="setInst('${id}')">`:''}
+  <h2>ගෙවීම් ඉතිහාසය</h2><div class="card" style="box-shadow:none">${(r.payments||[]).length?r.payments.map((p,i)=>`<div class="item row"><span>${p.date}</span><span><b>${rs(p.amount)}</b> <a onclick="delPay('${t}','${id}',${i})" style="color:var(--bad);margin-left:8px">✕</a></span></div>`).join(''):'<div class="empty">ගෙවීම් නැත</div>'}</div>
+  ${b>0?`<label>${t==='buy'?'මම ගෙවන':'මට ලැබුණු'} මුදල (රු.)</label><input type="number" inputmode="decimal" id="p_amt" value="${Math.round(r.inst?Math.min(b,(ist.find(x=>!x.done)||{amount:b}).amount-(ist.find(x=>!x.done)||{got:0}).got):b)}">
+  <label>දිනය</label><input type="date" id="p_date" value="${today()}">
+  <button class="btn" onclick="addPay('${t}','${id}')">ගෙවීමක් එකතු කරන්න</button>
+  ${r.inst?'':`<label>අලුත් අවසන් දිනයක් (අවශ්‍ය නම්)</label><input type="date" id="p_due" value="${r.due||''}" onchange="chDue('${t}','${id}',this.value)">`}`:''}
+  <button class="btn del" onclick="delRec('${t}','${id}')">මෙම ඇතුළත් කිරීම මකන්න</button>
+  <button class="btn sec" onclick="closeM()">වසන්න</button>`;
+  $('modal').classList.add('show');
+}
+const get=(t,id)=>(t==='buy'?S.purchases:S.sales).find(x=>x.id===id);
+function setInst(id){const r=get('sell',id);const n=$('d_inst').value.trim();r.instName=n;r.given=n?($('d_given').value||today()):'';save();render()}
+function addPay(t,id){const r=get(t,id),a=+$('p_amt').value;if(!(a>0))return alert('මුදල ඇතුළත් කරන්න');if(a>bal(r)+0.5)return alert('ඉතිරි මුදලට වඩා වැඩියි');r.payments.push({date:$('p_date').value||today(),amount:a});syncDue(r);save();render();openDetail(t,id)}
+function delPay(t,id,i){if(!confirm('මෙම ගෙවීම මකන්නද?'))return;const r=get(t,id);r.payments.splice(i,1);if(r.inst&&r.inst.length&&bal(r)>0){r.due=r.inst[0].due;syncDue(r)}save();render();openDetail(t,id)}
+function chDue(t,id,v){get(t,id).due=v;save();render()}
+function delRec(t,id){if(!confirm('මෙය සම්පූර්ණයෙන්ම මකන්නද?'))return;if(t==='buy')S.purchases=S.purchases.filter(x=>x.id!==id);else S.sales=S.sales.filter(x=>x.id!==id);save();closeM();render()}
+function closeM(){$('modal').classList.remove('show')}
+$('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeM()});
+
+/* ---------- Backup ---------- */
+const plugins=()=>(window.Capacitor&&window.Capacitor.Plugins)||{};
+async function exportData(){
+  const json=JSON.stringify(S);
+  const fname='zara-looms-backup-'+today()+'.json';
+  const P=plugins();
+  if(P.Filesystem&&P.Share){
+    try{
+      const r=await P.Filesystem.writeFile({path:fname,data:json,directory:'CACHE',encoding:'utf8'});
+      await P.Share.share({title:'Zara Looms Backup',files:[r.uri],dialogTitle:'Backup එක සුරකින්න / යවන්න'});
+      return;
+    }catch(e){
+      if(/cancel/i.test(String((e&&e.message)||e)))return;
+    }
+  }
+  try{
+    const blob=new Blob([json],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;document.body.appendChild(a);a.click();a.remove();
+  }catch(e){}
+  alert('ගොනුව ලබා ගත නොහැකි නම්, "Backup එක text එකක් විදිහට copy කරන්න" බොත්තම භාවිතා කරන්න.');
+}
+function copyBackup(){
+  const json=JSON.stringify(S);
+  $('sheet').innerHTML=`<h3>📋 Backup text එක</h3><div class="s" style="font-size:13px">පහළ text එක සම්පූර්ණයෙන්ම copy කරලා WhatsApp / Notes / Gmail (ඔයාටම යවන්න) එකක සුරකින්න. ආපසු දාන්න ඕන වුණාම "Text එකකින් ආපසු දාන්න" වලින් paste කරන්න.</div>
+  <textarea id="bk_txt" rows="8" readonly style="margin-top:10px;font-size:11px">${esc(json)}</textarea>
+  <button class="btn" onclick="doCopy()">📋 Copy කරන්න</button><button class="btn sec" onclick="closeM()">වසන්න</button>`;
+  $('modal').classList.add('show');
+}
+function doCopy(){
+  const t=$('bk_txt');t.focus();t.select();t.setSelectionRange(0,t.value.length);
+  let ok=false;
+  try{ok=document.execCommand('copy')}catch(e){}
+  if(!ok&&navigator.clipboard){navigator.clipboard.writeText(t.value).then(()=>alert('Copy වුණා ✅'),()=>alert('Text එක අතින් select කරලා copy කරන්න'));return}
+  alert(ok?'Copy වුණා ✅':'Text එක අතින් select කරලා copy කරන්න');
+}
+function pasteRestore(){
+  $('sheet').innerHTML=`<h3>📥 Text එකකින් ආපසු දාන්න</h3><div class="s" style="font-size:13px">කලින් copy කරපු backup text එක මෙතන paste කරන්න.</div>
+  <textarea id="rs_txt" rows="8" style="margin-top:10px;font-size:11px" placeholder="මෙතන paste කරන්න"></textarea>
+  <button class="btn" onclick="applyImport($('rs_txt').value,true)">ආපසු දාන්න</button><button class="btn sec" onclick="closeM()">අවලංගු</button>`;
+  $('modal').classList.add('show');
+}
+function applyImport(text,fromSheet){
+  try{
+    const d=JSON.parse(String(text).trim());
+    if(!Array.isArray(d.purchases)||!Array.isArray(d.sales))throw 0;
+    if(!confirm('දැනට තියෙන දත්ත මේකෙන් ප්‍රතිස්ථාපනය වෙනවා. සුදානම්ද?'))return;
+    S=d;norm();save();if(fromSheet)closeM();render();alert('සාර්ථකයි ✅');
+  }catch(e){alert('වැරදි backup එකක්')}
+}
+function importData(inp){
+  const f=inp.files[0];if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{applyImport(rd.result,false);inp.value=''};
+  rd.onerror=()=>alert('ගොනුව කියවීමට නොහැකි විය');
+  rd.readAsText(f);
+}
+function wipe(){if(confirm('සියලු දත්ත මැකෙනවා! සහතිකද?')&&confirm('නැවත ආපසු ගන්න බැහැ. මකන්නද?')){S={purchases:[],sales:[],contacts:[]};save();render()}}
+
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;q='';render();window.scrollTo(0,0)});
+norm();save();
+render();
+</script>
+</body>
+</html>
