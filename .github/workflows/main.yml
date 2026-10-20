@@ -18,7 +18,7 @@ jobs:
       - name: Arrange files
         run: |
           mkdir -p www
-          cp zara-app3.html www/index.html
+          cp zara-app4.html www/index.html
           cp logo.png www/
       - run: npm install
       - name: Add backup plugins
@@ -29,7 +29,7 @@ jobs:
           KS: ${{ secrets.KEYSTORE_B64 }}
         run: |
           if [ -z "$KS" ]; then
-            echo "::error::KEYSTORE_B64 secret එක නැහැ."
+            echo "::error::KEYSTORE_B64 secret එක නැහැ. Settings > Secrets and variables > Actions වලින් එකතු කරන්න."
             exit 1
           fi
           mkdir -p ~/.android
