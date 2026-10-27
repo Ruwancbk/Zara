@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Zara Looms v1.8
 on:
   workflow_dispatch:
   push:
@@ -8,28 +8,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
-      - name: Arrange files
+      - name: Unpack source zip
         run: |
-          mkdir -p www assets
-          cp index.html logo.png www/
-          cp icon.png assets/icon-only.png
-      - run: npm install
-      - run: npx cap add android
-      - name: Generate app icon
-        continue-on-error: true
-        run: npx --yes @capacitor/assets generate --android --iconBackgroundColor '#ffffff' --iconBackgroundColorDark '#ffffff'
-      - run: npx cap sync android
-      - name: Build debug APK
-        working-directory: android
-        run: chmod +x gradlew && ./gradlew assembleDebug
+          ZIP="$(ls *.zip | head -1)"
+          if [ -z "$ZIP" ]; then
+            echo "::error::ZaraLooms-Android-Source-v1.8.zip ගොනුව repo එකේ නැහැ. Upload කරන්න."
+            exit 1
+          fi
+          echo "Using $ZIP"
+          mkdir src
+          unzip -q "$ZIP" -d src
+          ls src
+      - name: Use permanent signing key
+        env:
+          KS: ${{ secrets.KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KS" ]; then
+            echo "::error::KEYSTORE_B64 secret එක නැහැ. Settings > Secrets and variables > Actions වලින් එකතු කරන්න."
+            exit 1
+          fi
+          echo "$KS" | base64 -d > src/zara_looms_key.p12
+          keytool -list -keystore src/zara_looms_key.p12 -storetype pkcs12 -storepass android | grep -i androiddebugkey
+      - name: Fix project settings
+        run: |
+          printf 'android.useAndroidX=true\norg.gradle.jvmargs=-Xmx2g\n' > src/gradle.properties
+          cat > src/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+              <background android:drawable="@android:color/white"/>
+              <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+          </adaptive-icon>
+          XML
+          cat src/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.9
+      - name: Build release APK
+        working-directory: src
+        run: gradle assembleRelease --no-daemon --stacktrace
       - uses: actions/upload-artifact@v4
         with:
-          name: zara-looms-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: zara-looms-v1.8-apk
+          path: src/app/build/outputs/apk/release/*.apk
